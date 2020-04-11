@@ -22,35 +22,50 @@
 
 namespace tokens
 {
+	// A custom variant type that can hold an empty token or any matchable token.
 	class any_token: protected variant<TOKENS_EVERY>
 	{
 	public:
-		using variant = variant;
-		
 		using variant::variant;
 		
 		using variant::emplace;
 		
 		using variant::operator=;
 		
+		// Checks if this holds any of the given token type.
 		template<typename... T>
 		constexpr bool holds() const
-		{
-			return (holds_alternative<T>(self) || ...);
-		}
+		{ return (holds_alternative<T>(self) || ...); }
 		
-		bool should_skip(token_flags flags);
+		// Applies the given visitor object to the held token.
+		template<typename V>
+		decltype(auto) visit(V&& visitor)
+		{ return std::visit(visitor, (variant&)self); }
 		
-		string_view name();
+		// Applies the given visitor object to the held token.
+		template<typename V>
+		decltype(auto) visit(V&& visitor) const
+		{ return std::visit(visitor, (const variant&)self); }
 		
-		string_view source_name();
+		// Based on the given flags, checks if the held token should be skipped.
+		bool should_skip(token_flags flags) const;
 		
-		string_view source_slice();
+		// Returns the held token's name.
+		string_view name() const;
 		
-		size_t lineno();
+		// Returns the name of the source where the held token was matched.
+		string_view source_name() const;
 		
-		int lineindent();
+		// Returns the section of the source text where the held token was matched.
+		string_view source_slice() const;
 		
+		// Returns the line number where the held token was matched.
+		size_t lineno() const;
+		
+		// Returns the indentation of the line where the held token was matched.
+		int lineindent() const;
+		
+		// Prints the token's text to an ostream.
 		friend ostream& operator<<(ostream& os, const any_token& token);
 	};
 }

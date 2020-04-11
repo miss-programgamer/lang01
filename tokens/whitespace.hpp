@@ -12,19 +12,13 @@ namespace tokens
 	
 	class any_token;
 	
-	/**
-	 * Matches arbitrary non-leading whitespace.
-	 */
+	// Matches arbitrary non-leading whitespace.
 	class whitespace: public basic_token
 	{
 	public:
 		static constexpr string_view type = "whitespace";
 		
 		using basic_token::basic_token;
-		
-		static bool start_match(tokenizer& stream, const any_token& prev);
-		
-		static bool end_match(tokenizer& stream, const any_token& prev);
 		
 		friend ostream& operator<<(ostream& os, const whitespace& token);
 	};

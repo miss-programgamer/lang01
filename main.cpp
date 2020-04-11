@@ -1,9 +1,25 @@
 #include "main.hpp"
 #include "utils.hpp"
 #include "tokens.hpp"
+#include "nodes.hpp"
 
 
-void main(int argc, char* argv[])
+// TODO: Parse tokens into AST nodes
+// TODO: Compile the AST into bytecode
+// TODO: Create the VM for said bytecode
+
+
+ostream& operator<<(ostream& os, const vector<any_token>& tokens)
+{
+    for (auto token: tokens)
+    {
+        cout << token << "\n";
+    }
+    return os;
+}
+
+
+int main(int argc, char* argv[])
 {
     // store program name
     const string program_name = argv[0];
@@ -13,62 +29,49 @@ void main(int argc, char* argv[])
     
     if (args.size() == 0)
     {
-        // signal repl mode
         cout << "Starting Lang01 in REPL mode:" << endl;
         
-        // TODO: implement repl mode
-        string source_text;
-        
-        do
+        for (string source_text; source_text != ".exit";)
         {
-            // fill source text with console input
+            // fill vector with tokens matched from console input
             slurp(cin, source_text);
-            
-            // create token stream from source name and text
-            tokenizer tokenizer(program_name, source_text);
-            
-            // create array of tokens
             vector<any_token> tokens;
-            for (any_token token; tokenizer.next(token, token_flags::ONLY_SEMANTIC);)
-                tokens.push_back(token);
+            tokenizer tokenizer(program_name, source_text);
+            tokenizer.fill(tokens, token_flags::ONLY_SEMANTIC);
             
-            // print tokens
-            for (auto token: tokens) {
-                cout << token << endl;
-            }
-        }
-        while (source_text != ".exit");
-        
-        cout << "Goodbye!" << endl;
-    }
-    else if (args.size() == 1)
-    {
-        // use the given argument as a filename for finding the source text
-        const auto source_name = string(args[0]);
-        
-        // create and fill source text string
-        string source_text;
-        slurp(source_name, source_text);
-        
-        // create token stream from source name and text
-        tokenizer tokenizer(source_name, source_text);
-        
-        // create array of tokens
-        vector<any_token> tokens;
-        any_token token;
-        while (tokenizer.next(token, token_flags::ONLY_SEMANTIC))
-            tokens.push_back(token);
-        
-        // print tokens
-        for (auto token: tokens) {
-            cout << token << endl;
+            // fill vector with nodes matched from tokens
+            any_node program;
+            parser parser(tokens, program_name);
+            parser.fill(program);
+            
+            // print program nodes
+            cout << tokens << "\n";
+            cout << program;
         }
         
-        cout << "done" << endl;
+        cout << "Goodbye!\n";
     }
     else
     {
-        // we can only run a program when we have a single argument
-        cout << "Lang01 takes exactly one argument; the name of a file to run." << endl;
+        string source_text;
+        for (const auto source_name: args)
+        {
+            // fill vector of tokens created from a source file
+            slurp(string(source_name), source_text);
+            vector<any_token> tokens;
+            tokenizer tokenizer(source_name, source_text);
+            tokenizer.fill(tokens, token_flags::ONLY_SEMANTIC);
+            
+            // fill vector with nodes matched from tokens
+            any_node program;
+            parser parser(tokens, source_name);
+            parser.fill(program);
+            
+            // print program nodes
+            cout << tokens << "\n";
+            cout << program;
+        }
     }
+    
+    return 0;
 }

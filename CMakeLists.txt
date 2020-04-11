@@ -11,9 +11,13 @@ add_executable(Lang01
 	
 	"ex.hpp"
 	
+	"utils/argsview.hpp"
+	"utils/argsview.cpp"
+	"utils/misc.hpp"
+	"utils/misc.cpp"
+	"utils.hpp"
+	
 	"tokens/flags.hpp"
-	"tokens/tokenizer.hpp"
-	"tokens/tokenizer.cpp"
 	"tokens/basic_token.hpp"
 	"tokens/basic_token.cpp"
 	"tokens/empty.hpp"
@@ -32,11 +36,22 @@ add_executable(Lang01
 	"tokens/invalid.cpp"
 	"tokens/any_token.hpp"
 	"tokens/any_token.cpp"
+	"tokens/tokenizer.hpp"
+	"tokens/tokenizer.cpp"
+	"tokens.hpp"
 	
-	"utils/argsview.hpp"
-	"utils/argsview.cpp"
-	"utils/misc.hpp"
-	"utils/misc.cpp"
-	"utils.hpp")
+	"nodes/basic_node.hpp"
+	"nodes/basic_node.cpp"
+	"nodes/no_op.hpp"
+	"nodes/no_op.cpp"
+	"nodes/program_decl.hpp"
+	"nodes/program_decl.cpp"
+	"nodes/call_op.hpp"
+	"nodes/call_op.cpp"
+	"nodes/any_node.hpp"
+	"nodes/any_node.cpp"
+	"nodes/parser.hpp"
+	"nodes/parser.cpp"
+	"nodes.hpp")
 
 set_property(TARGET Lang01 PROPERTY CXX_STANDARD 17)

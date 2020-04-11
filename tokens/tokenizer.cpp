@@ -3,7 +3,7 @@
 
 namespace tokens
 {
-	tokenizer::tokenizer(const string& source_name, const string& source_text):
+	tokenizer::tokenizer(const string_view& source_name, const string_view& source_text):
 		source_name(source_name),
 		source_text(source_text)
 	{
@@ -19,28 +19,26 @@ namespace tokens
 	
 	bool tokenizer::next(any_token& token, token_flags flags)
 	{
-		if (!self)
+		unless (self)
 			return false;
 		
-		any_token temp = token;
-		do match_any_token<TOKENS_MATCHABLE>(temp);
-			while (self && temp.should_skip(flags));
+		do { // try matching tokens until we find one we shouldn't skip.
+			match_any_token<TOKENS_MATCHABLE>(cursor_token);
+		} while (self && cursor_token.should_skip(flags));
 		
-		if (!temp.should_skip(flags)) {
-			token = temp;
+		if (!cursor_token.should_skip(flags)) {
+			token = cursor_token;
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
-	unsigned int tokenizer::cursor_char() const
+	void tokenizer::fill(vector<any_token>& tokens, token_flags flags)
 	{
-		return self ? source_text[cursor_index] : '\0';
-	}
-	
-	string_view tokenizer::match_slice() const
-	{
-		return source_text.substr(match_start, cursor_index - match_start);
+		for (any_token token; next(token, flags);)
+			tokens.push_back(token);
+		
+		// TODO: return false if any invalid tokens matched
 	}
 }

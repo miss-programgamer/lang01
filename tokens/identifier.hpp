@@ -22,10 +22,6 @@ namespace tokens
 		
 		using basic_token::basic_token;
 		
-		static bool start_match(tokenizer& stream, const any_token& prev);
-		
-		static bool end_match(tokenizer& stream, const any_token& prev);
-		
 		friend ostream& operator<<(ostream& os, const identifier& token);
 	};
 }

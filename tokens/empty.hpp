@@ -27,10 +27,6 @@ namespace tokens
 		
 		static constexpr int lineindent = -1;
 		
-		static bool start_match(const tokenizer& stream, const any_token& prev);
-		
-		static bool end_match(const tokenizer& stream, const any_token& prev);
-		
 		friend ostream& operator<<(ostream& os, const empty& token);
 	};
 }
