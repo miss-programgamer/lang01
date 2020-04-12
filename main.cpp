@@ -33,11 +33,14 @@ int main(int argc, char* argv[])
         
         for (string source_text; source_text != ".exit";)
         {
-            // fill vector with tokens matched from console input
-            slurp(cin, source_text);
+            // read lines from cin
+            vector<string_view> source_lines;
+            slurp(cin, source_text, source_lines);
+            
+            // fill vector of tokens created from cin
             vector<any_token> tokens;
-            tokenizer tokenizer(program_name, source_text);
-            tokenizer.fill(tokens, token_flags::ONLY_SEMANTIC);
+            lexer lexer(program_name, source_lines);
+            lexer.fill(tokens /*, token_flags::ONLY_SEMANTIC*/);
             
             // fill vector with nodes matched from tokens
             any_node program;
@@ -45,7 +48,7 @@ int main(int argc, char* argv[])
             parser.fill(program);
             
             // print program nodes
-            cout << tokens << "\n";
+            cout << tokens;
             cout << program;
         }
         
@@ -53,14 +56,17 @@ int main(int argc, char* argv[])
     }
     else
     {
-        string source_text;
         for (const auto source_name: args)
         {
-            // fill vector of tokens created from a source file
-            slurp(string(source_name), source_text);
+            // read lines from a source file
+            string source_text;
+            vector<string_view> source_lines;
+            slurp(string(source_name), source_text, source_lines);
+            
+            // fill vector of tokens created from that source file
             vector<any_token> tokens;
-            tokenizer tokenizer(source_name, source_text);
-            tokenizer.fill(tokens, token_flags::ONLY_SEMANTIC);
+            lexer lexer(source_name, source_lines);
+            lexer.fill(tokens, token_flags::ONLY_SEMANTIC);
             
             // fill vector with nodes matched from tokens
             any_node program;
@@ -68,7 +74,7 @@ int main(int argc, char* argv[])
             parser.fill(program);
             
             // print program nodes
-            cout << tokens << "\n";
+            cout << tokens;
             cout << program;
         }
     }

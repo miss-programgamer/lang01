@@ -1,26 +1,25 @@
-#include "tokenizer.hpp"
+#include "lexer.hpp"
 
 
 namespace tokens
 {
-	tokenizer::tokenizer(const string_view& source_name, const string_view& source_text):
+	lexer::lexer(const string_view& source_name, const vector<string_view>& source_lines):
 		source_name(source_name),
-		source_text(source_text)
+		source_lines(&source_lines)
 	{
-		cursor_index = 0;
-		cursor_lineno = 0;
+		cursor_lineindex = 0;
+		cursor_charindex = 0;
 		cursor_lineindent = 0;
 	}
 	
-	tokenizer::operator bool() const
+	lexer::operator bool() const
 	{
-		return cursor_index < source_text.size();
+		return cursor_lineindex < source_lines->size() && cursor_charindex < (*source_lines)[cursor_lineindex].size();
 	}
 	
-	bool tokenizer::next(any_token& token, token_flags flags)
+	bool lexer::next(any_token& token, token_flags flags)
 	{
-		unless (self)
-			return false;
+		unless (self) return false;
 		
 		do { // try matching tokens until we find one we shouldn't skip.
 			match_any_token<TOKENS_MATCHABLE>(cursor_token);
@@ -34,7 +33,7 @@ namespace tokens
 		}
 	}
 	
-	void tokenizer::fill(vector<any_token>& tokens, token_flags flags)
+	void lexer::fill(vector<any_token>& tokens, token_flags flags)
 	{
 		for (any_token token; next(token, flags);)
 			tokens.push_back(token);

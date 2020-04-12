@@ -4,20 +4,14 @@
 
 #include "../main.hpp"
 #include "flags.hpp"
-#include "empty.hpp"
-#include "linestart.hpp"
-#include "lineend.hpp"
-#include "identifier.hpp"
-#include "whitespace.hpp"
-#include "comment.hpp"
-#include "invalid.hpp"
+#include "every_token.hpp"
 
 
 // Comma-separated list of all valid token types
-#define TOKENS_EVERY empty, linestart, lineend, identifier, whitespace, comment, invalid
+#define TOKENS_EVERY empty, indentation, newline, identifier, numeric, quoted_string, short_string, comment, invalid
 
 // Comma-separated list of all tokens that can be matched
-#define TOKENS_MATCHABLE linestart, lineend, identifier, whitespace, comment, invalid
+#define TOKENS_MATCHABLE indentation, newline, identifier, numeric, quoted_string, short_string, comment, invalid
 
 
 namespace tokens

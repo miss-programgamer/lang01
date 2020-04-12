@@ -9,9 +9,7 @@ namespace tokens
 {
 	class any_token;
 	
-	/**
-	 * The type from which every token inherits. Useless when used on its own.
-	 */
+	// The type from which every token inherits. Useless when used on its own.
 	class basic_token
 	{
 		friend class any_token;
@@ -25,8 +23,10 @@ namespace tokens
 		
 		int lineindent;
 		
+		size_t leading_space;
+		
 	public:
-		basic_token(const string_view source_name, const string_view source_slice, size_t lineno, int lineindent) noexcept;
+		basic_token(const string_view source_name, const string_view source_slice, size_t lineno, int lineindent, size_t leading_space) noexcept;
 	};
 }
 

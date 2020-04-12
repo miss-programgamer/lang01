@@ -5,8 +5,7 @@ namespace tokens
 {
 	bool any_token::should_skip(token_flags flags) const
 	{
-		return (((flags & token_flags::SKIP_WHITESPACE) != token_flags::NONE && holds<whitespace>()) ||
-				((flags & token_flags::SKIP_COMMENTS)   != token_flags::NONE && holds<comment>()));
+		return (flags & token_flags::SKIP_COMMENTS) != token_flags::NONE && holds<comment>();
 	}
 	
 	string_view any_token::name() const

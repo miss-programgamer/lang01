@@ -7,9 +7,9 @@
 
 namespace utils
 {
-	bool slurp(const string& filename, string& text);
+	void slurp(const string& filename, string& text, vector<string_view>& lines);
 	
-	void slurp(istream& is, string& text);
+	void slurp(istream& is, string& text, vector<string_view>& lines);
 }
 
 
