@@ -3,11 +3,6 @@
 
 namespace tokens
 {
-	bool any_token::should_skip(token_flags flags) const
-	{
-		return (flags & token_flags::SKIP_COMMENTS) != token_flags::NONE && holds<comment>();
-	}
-	
 	string_view any_token::name() const
 	{
 		return visit([](auto&& token) {
@@ -26,6 +21,13 @@ namespace tokens
 	{
 		return visit([](auto&& token) -> string_view {
 			return token.source_slice;
+		});
+	}
+	
+	string_view any_token::content() const
+	{
+		return visit([](auto&& token) -> string_view {
+			return token.content();
 		});
 	}
 	

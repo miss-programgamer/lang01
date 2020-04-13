@@ -20,7 +20,7 @@ namespace tokens
 	};
 	
 	
-	// Signals a line start token.
+	// Signals a line start with indentation token.
 	class indentation: public basic_token
 	{
 	public:
@@ -32,13 +32,22 @@ namespace tokens
 	};
 	
 	
-	// Signals a line end token.
+	// Signals a new line token with a comment.
 	class newline: public basic_token
 	{
 	public:
 		static constexpr string_view type = "new line";
 		
 		using basic_token::basic_token;
+		
+		inline bool has_comment() const
+		{ return source_slice[0] == ';'; }
+		
+		inline bool has_linefeed() const
+		{ return source_slice[source_slice.size() - 1] == '\n'; }
+		
+		inline string_view content() const
+		{ return has_comment() ? source_slice.substr(1, source_slice.size() - 1 - has_linefeed()) : source_slice.substr(0, 0); }
 		
 		friend ostream& operator<<(ostream& os, const newline& token);
 	};
@@ -76,6 +85,12 @@ namespace tokens
 		
 		using basic_token::basic_token;
 		
+		inline bool has_closing_quote() const
+		{ return source_slice[source_slice.size() - 1] == '"'; }
+		
+		inline string_view content() const
+		{ return source_slice.substr(1, source_slice.size() - 1 - has_closing_quote()); }
+		
 		friend ostream& operator<<(ostream& os, const quoted_string& token);
 	};
 	
@@ -88,19 +103,34 @@ namespace tokens
 		
 		using basic_token::basic_token;
 		
+		inline string_view content() const
+		{ return source_slice.substr(1, source_slice.size() - 1); }
+		
 		friend ostream& operator<<(ostream& os, const short_string& token);
 	};
 	
 	
-	// Represents a comment.
-	class comment: public basic_token
+	// Represents a surrounding or separating delimiter.
+	class delimiter: public basic_token
 	{
 	public:
-		static constexpr string_view type = "comment";
+		static constexpr string_view type = "delimiter";
 		
 		using basic_token::basic_token;
 		
-		friend ostream& operator<<(ostream& os, const comment& token);
+		friend ostream& operator<<(ostream& os, const delimiter& token);
+	};
+	
+	
+	// Represents an operator.
+	class operator_t: public basic_token
+	{
+	public:
+		static constexpr string_view type = "operator";
+		
+		using basic_token::basic_token;
+		
+		friend ostream& operator<<(ostream& os, const operator_t& token);
 	};
 	
 	
@@ -117,19 +147,20 @@ namespace tokens
 }
 
 
-#else // HEADER_TOKENS_LINESTART_DEFINED
+#else // HEADER_TOKENS_EVERY_TOKEN_DEFINED
 
 
 namespace tokens
 {
 	class empty;
-	class linestart;
-	class lineend;
+	class indentation;
+	class newline;
 	class identifier;
 	class numeric;
 	class quoted_string;
 	class short_string;
-	class comment;
+	class delimiter;
+	class operator_t;
 	class invalid;
 }
 

@@ -10,6 +10,7 @@ namespace tokens
 		cursor_lineindex = 0;
 		cursor_charindex = 0;
 		cursor_lineindent = 0;
+		invalid_count = 0;
 	}
 	
 	lexer::operator bool() const
@@ -17,27 +18,25 @@ namespace tokens
 		return cursor_lineindex < source_lines->size() && cursor_charindex < (*source_lines)[cursor_lineindex].size();
 	}
 	
-	bool lexer::next(any_token& token, token_flags flags)
+	bool lexer::next(any_token& dest)
 	{
-		unless (self) return false;
-		
-		do { // try matching tokens until we find one we shouldn't skip.
-			match_any_token<TOKENS_MATCHABLE>(cursor_token);
-		} while (self && cursor_token.should_skip(flags));
-		
-		if (!cursor_token.should_skip(flags)) {
-			token = cursor_token;
+		if (self && match_any_token<TOKENS_MATCHABLE>(cursor_token))
+		{
+			dest = cursor_token;
 			return true;
-		} else {
-			return false;
 		}
+		else {
+			return false;
+		}	
 	}
 	
-	void lexer::fill(vector<any_token>& tokens, token_flags flags)
+	bool lexer::fill(vector<any_token>& tokens)
 	{
-		for (any_token token; next(token, flags);)
+		for (any_token token; next(token);)
+		{
 			tokens.push_back(token);
+		}
 		
-		// TODO: return false if any invalid tokens matched
+		return invalid_count == 0;
 	}
 }

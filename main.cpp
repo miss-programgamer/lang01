@@ -35,12 +35,13 @@ int main(int argc, char* argv[])
         {
             // read lines from cin
             vector<string_view> source_lines;
+            cout << "> ";
             slurp(cin, source_text, source_lines);
             
             // fill vector of tokens created from cin
             vector<any_token> tokens;
             lexer lexer(program_name, source_lines);
-            lexer.fill(tokens /*, token_flags::ONLY_SEMANTIC*/);
+            lexer.fill(tokens);
             
             // fill vector with nodes matched from tokens
             any_node program;
@@ -48,7 +49,7 @@ int main(int argc, char* argv[])
             parser.fill(program);
             
             // print program nodes
-            cout << tokens;
+            cout << tokens << "===\n";
             cout << program;
         }
         
@@ -66,7 +67,7 @@ int main(int argc, char* argv[])
             // fill vector of tokens created from that source file
             vector<any_token> tokens;
             lexer lexer(source_name, source_lines);
-            lexer.fill(tokens, token_flags::ONLY_SEMANTIC);
+            lexer.fill(tokens);
             
             // fill vector with nodes matched from tokens
             any_node program;
@@ -74,7 +75,7 @@ int main(int argc, char* argv[])
             parser.fill(program);
             
             // print program nodes
-            cout << tokens;
+            cout << tokens << "===\n";
             cout << program;
         }
     }

@@ -27,6 +27,9 @@ namespace tokens
 		
 	public:
 		basic_token(const string_view source_name, const string_view source_slice, size_t lineno, int lineindent, size_t leading_space) noexcept;
+		
+		inline string_view content() const
+		{ return source_slice; }
 	};
 }
 

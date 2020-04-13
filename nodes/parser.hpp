@@ -18,6 +18,8 @@ namespace nodes
 		
 		size_t cursor_index;
 		
+		any_node root;
+		
 		size_t match_start;
 		
 	public:
@@ -31,9 +33,41 @@ namespace nodes
 		bool fill(any_node& node);
 		
 	protected:
-		const any_token& cursor_token();
+		// Returns the token at the current cursor position.
+		inline const any_token& cursor_token()
+		{ return (*tokens)[cursor_index]; }
 		
-		bool match_call_op(any_node& parent);
+		// Returns the slice of the cursor token.
+		inline const string_view cursor_slice()
+		{ return cursor_token().source_slice(); }
+		
+		// Moves the cursor forward by one.
+		inline void advance_cursor()
+		{ ++cursor_index; }
+		
+		// Generic expression matching function. Only its specialisations can be called.
+		template<typename T>
+		bool match_expr(any_node& parent);
+		
+		// Tries to match every given kind of token.
+		template<typename... T>
+		bool match_any_expr(any_node& parent)
+		{ return (match_expr<T>(parent) || ...); }
+		
+		// Tries matching a call expression.
+		template<>
+		bool match_expr<call>(any_node& parent)
+		{
+			if (cursor_token().holds<identifier>())
+			{
+				parent.emplace_child<call>(cursor_slice());
+				advance_cursor();
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
 	};
 }
 

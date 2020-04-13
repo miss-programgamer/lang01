@@ -13,7 +13,6 @@ using tokens::identifier;
 using tokens::comment;
 using tokens::invalid;
 using tokens::any_token;
-using tokens::token_flags;
 using tokens::lexer;
 
 

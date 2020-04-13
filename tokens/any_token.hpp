@@ -3,15 +3,14 @@
 
 
 #include "../main.hpp"
-#include "flags.hpp"
 #include "every_token.hpp"
 
 
 // Comma-separated list of all valid token types
-#define TOKENS_EVERY empty, indentation, newline, identifier, numeric, quoted_string, short_string, comment, invalid
+#define TOKENS_EVERY empty, indentation, newline, identifier, numeric, quoted_string, short_string, delimiter, operator_t, invalid
 
 // Comma-separated list of all tokens that can be matched
-#define TOKENS_MATCHABLE indentation, newline, identifier, numeric, quoted_string, short_string, comment, invalid
+#define TOKENS_MATCHABLE indentation, newline, identifier, numeric, quoted_string, short_string, delimiter, operator_t, invalid
 
 
 namespace tokens
@@ -41,17 +40,17 @@ namespace tokens
 		decltype(auto) visit(V&& visitor) const
 		{ return std::visit(visitor, (const variant&)self); }
 		
-		// Based on the given flags, checks if the held token should be skipped.
-		bool should_skip(token_flags flags) const;
-		
 		// Returns the held token's name.
 		string_view name() const;
 		
-		// Returns the name of the source where the held token was matched.
+		// Returns the name of the source text where the held token was matched.
 		string_view source_name() const;
 		
-		// Returns the section of the source text where the held token was matched.
+		// Returns the slice of source text obtained when the held token was matched.
 		string_view source_slice() const;
+		
+		// Returns the contents of the token. (Not always the same as source_slice)
+		string_view content() const;
 		
 		// Returns the line number where the held token was matched.
 		size_t lineno() const;

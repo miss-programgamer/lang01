@@ -3,6 +3,19 @@
 
 namespace nodes
 {
+	any_node::any_node(any_node&& other)
+	{
+		self = (variant&)other;
+		other.children_nodes().clear();
+	}
+	
+	any_node& any_node::operator=(any_node&& other)
+	{
+		self = (variant&)other;
+		other.children_nodes().clear();
+		return self;
+	}
+	
 	any_node::~any_node()
 	{
 		for (auto child_node: children_nodes())
@@ -29,6 +42,7 @@ namespace nodes
 			return &node.children_nodes;
 		});
 	}
+	
 	
 	static inline int nodes_index()
 	{ static int index = ios_base::xalloc(); return index; }

@@ -17,7 +17,6 @@ add_executable(Lang01
 	"utils/misc.cpp"
 	"utils.hpp"
 	
-	"tokens/flags.hpp"
 	"tokens/basic_token.hpp"
 	"tokens/basic_token.cpp"
 	"tokens/every_token.hpp"
@@ -30,12 +29,8 @@ add_executable(Lang01
 	
 	"nodes/basic_node.hpp"
 	"nodes/basic_node.cpp"
-	"nodes/no_op.hpp"
-	"nodes/no_op.cpp"
-	"nodes/program_decl.hpp"
-	"nodes/program_decl.cpp"
-	"nodes/call_op.hpp"
-	"nodes/call_op.cpp"
+	"nodes/every_node.hpp"
+	"nodes/every_node.cpp"
 	"nodes/any_node.hpp"
 	"nodes/any_node.cpp"
 	"nodes/parser.hpp"

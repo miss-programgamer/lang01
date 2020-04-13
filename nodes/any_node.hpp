@@ -4,16 +4,14 @@
 
 #include "../main.hpp"
 #include "basic_node.hpp"
-#include "no_op.hpp"
-#include "program_decl.hpp"
-#include "call_op.hpp"
+#include "every_node.hpp"
 
 
 // Comma-separated list of all valid node types
-#define NODES_EVERY no_op, program_decl, call_op
+#define NODES_EVERY nop, program, call
 
 // Comma-separated list of all nodes that can be matched
-#define NODES_MATCHABLE program_decl, call_op
+#define NODES_MATCHABLE call
 
 
 namespace nodes
@@ -27,54 +25,43 @@ namespace nodes
 		
 		using variant::emplace;
 		
+		any_node(any_node&& other);
+		
+		any_node& operator=(any_node&& other);
+		
 		~any_node();
 		
-		/**
-		 * Checks if this holds any of the given node type.
-		 */
+		// Checks if this holds any of the given node type.
 		template<typename... T>
 		constexpr bool holds() const
 		{ return (holds_alternative<T>(self) || ...); }
 		
-		/**
-		 * Applies the given visitor object to the held node.
-		 */
+		// Applies the given visitor object to the held node.
 		template<typename V>
 		decltype(auto) visit(V&& visitor)
 		{ return std::visit(visitor, (variant&)self); }
 		
-		/**
-		 * Applies the given visitor object to the held node.
-		 */
+		// Applies the given visitor object to the held node.
 		template<typename V>
 		decltype(auto) visit(V&& visitor) const
 		{ return std::visit(visitor, (const variant&)self); }
 		
-		/**
-		 * Constructs and inserts a node as the last child of this node.
-		 */
+		// Constructs and inserts a node as the last child of this node.
 		template<typename N, typename... A>
 		any_node* emplace_child(A&&... args)
 		{
-			any_node* node = new any_node();
-			node->emplace<N>(this, std::forward<A>(args)...);
+			any_node* node = new any_node(N(this, std::forward<A>(args)...));
 			children_nodes().push_back(node);
 			return node; // TODO: change this to return the emplaced type
 		}
 		
-		/**
-		 * Returns a pointer to the parent node if there is one.
-		 */
+		// Returns a pointer to the parent node if there is one.
 		any_node* parent_node();
 		
-		/**
-		 * Returns a reference to the vector of children nodes
-		 */
+		// Returns a reference to the vector of children nodes
 		vector<any_node*>& children_nodes();
 		
-		/**
-		 * Returns a reference to the vector of children nodes
-		 */
+		// Returns a reference to the vector of children nodes
 		const vector<any_node*>& children_nodes() const;
 		
 		friend ostream& operator<<(ostream& os, const any_node& node);
