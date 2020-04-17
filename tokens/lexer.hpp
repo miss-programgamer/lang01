@@ -12,7 +12,7 @@ namespace tokens
 	class lexer
 	{
 		friend class empty;
-		friend class indentation;
+		friend class upline;
 		friend class newline;
 		friend class identifier;
 		friend class comment;
@@ -25,6 +25,9 @@ namespace tokens
 		
 		// the source lines that will get tokenized.
 		const vector<string_view>* source_lines;
+		
+		// the vector to fill with tokens.
+		vector<any_token>* tokens;
 		
 		// the index of the current line.
 		size_t cursor_lineindex;
@@ -46,7 +49,7 @@ namespace tokens
 		
 	public:
 		// Creates a lexer of the given source text.
-		lexer(const string_view& source_name, const vector<string_view>& source_lines);
+		lexer(const string_view& source_name, const vector<string_view>& source_lines, vector<any_token>* tokens);
 		
 		// Checks if the lexer can still produce tokens.
 		operator bool() const;
@@ -56,7 +59,10 @@ namespace tokens
 		bool next(any_token& dest);
 		
 		// Fills the given vector with tokens by repeatedly calling next.
-		bool fill(vector<any_token>& tokens);
+		bool fill();
+		
+		// Converts the given source into tokens and places them into the given vector.
+		static bool lex(const string_view& source_name, const vector<string_view>& source_lines, vector<any_token>& tokens);
 		
 	protected:
 		// If the cursor position is valid, returns the current line. Otherwise, returns an empty slice.
@@ -153,39 +159,38 @@ namespace tokens
 			return (match_token<T>(dest, leading_space) || ...);
 		}
 		
-		// Try matching a linestart token.
+		// Try matching an up line token.
 		template<>
-		bool match_token<indentation>(any_token& dest, size_t leading_space)
+		bool match_token<upline>(any_token& dest, size_t leading_space)
 		{
-			if (!cursor_token.holds<empty, newline>())
+			if (!cursor_token.holds<empty, newline, upline>() || cursor_char() != '\t')
 				return false;
 			
 			start_match();
-			while (cursor_char() == '\t')
+			while (!cursor_is_endline())
 				advance_cursor_char();
-			return emplace_match<indentation>(dest, leading_space);
+			advance_cursor_char();
+			emplace_match<upline>(dest, leading_space);
+			advance_cursor_line();
+			return true;
 		}
 		
-		// Try matching a lineend token.
+		// Try matching a new line token.
 		template<>
 		bool match_token<newline>(any_token& dest, size_t leading_space)
 		{
-			if (cursor_char() == '\n')
+			if (cursor_is_endline() || cursor_char() == ';')
 			{
 				start_match();
+				
+				if (cursor_char() == ';')
+					do advance_cursor_char();
+						until (cursor_is_endline());
+				
 				advance_cursor_char();
 				emplace_match<newline>(dest, leading_space);
 				advance_cursor_line();
 				return true;
-			}
-			else if (cursor_char() == ';')
-			{
-				start_match();
-				advance_cursor_char();
-				until (cursor_is_endline())
-					advance_cursor_char();
-				advance_cursor_char();
-				return emplace_match<newline>(dest, leading_space);
 			}
 			else {
 				return false;
@@ -200,9 +205,10 @@ namespace tokens
 				return false;
 				
 			start_match();
-			advance_cursor_char();
-			while (cursor_is_letter_or_underscore() || cursor_is_digit())
-				advance_cursor_char();
+			
+			do advance_cursor_char();
+				while (cursor_is_letter_or_underscore() || cursor_is_digit());
+			
 			return emplace_match<identifier>(dest, leading_space);
 		}
 		
@@ -214,9 +220,10 @@ namespace tokens
 				return false;
 				
 			start_match();
-			advance_cursor_char();
-			while (cursor_is_letter_or_underscore() || cursor_is_digit())
-				advance_cursor_char();
+			
+			do advance_cursor_char();
+				while (cursor_is_letter_or_underscore() || cursor_is_digit());
+			
 			return emplace_match<numeric>(dest, leading_space);
 		}
 		
@@ -228,10 +235,11 @@ namespace tokens
 				return false;
 				
 			start_match();
+			
+			do advance_cursor_char();
+				until (cursor_char() == '"' || cursor_is_endline());
 			advance_cursor_char();
-			until (cursor_char() == '"' || cursor_is_endline())
-				advance_cursor_char();
-			advance_cursor_char();
+			
 			return emplace_match<quoted_string>(dest, leading_space);
 		}
 		
@@ -243,9 +251,10 @@ namespace tokens
 				return false;
 				
 			start_match();
-			advance_cursor_char();
-			until (cursor_is_whitespace() || cursor_is_endline())
-				advance_cursor_char();
+			
+			do advance_cursor_char();
+				until (cursor_is_whitespace() || cursor_is_endline());
+			
 			return emplace_match<short_string>(dest, leading_space);
 		}
 		
@@ -272,9 +281,11 @@ namespace tokens
 				return false;
 				
 			start_match();
-			advance_cursor_char();
-			while (cursor_is_symbol())
-				advance_cursor_char();
+			
+			do advance_cursor_char();
+				while (cursor_is_symbol());
+			
+			
 			return emplace_match<operator_t>(dest, leading_space);
 		}
 		

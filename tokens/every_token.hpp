@@ -20,15 +20,18 @@ namespace tokens
 	};
 	
 	
-	// Signals a line start with indentation token.
-	class indentation: public basic_token
+	// Contains an indented line that will be lexed later.
+	class upline: public basic_token
 	{
 	public:
-		static constexpr string_view type = "indentation";
+		static constexpr string_view type = "up line";
 		
 		using basic_token::basic_token;
 		
-		friend ostream& operator<<(ostream& os, const indentation& token);
+		inline string_view content() const
+		{ return source_slice.substr(1, source_slice.size() - 1); }
+		
+		friend ostream& operator<<(ostream& os, const upline& token);
 	};
 	
 	
@@ -153,7 +156,7 @@ namespace tokens
 namespace tokens
 {
 	class empty;
-	class indentation;
+	class upline;
 	class newline;
 	class identifier;
 	class numeric;

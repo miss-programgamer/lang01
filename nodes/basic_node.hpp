@@ -3,6 +3,7 @@
 
 
 #include "../main.hpp"
+#include "context.hpp"
 
 
 namespace nodes
@@ -19,6 +20,10 @@ namespace nodes
 		vector<any_node*> children_nodes;
 		
 		basic_node(any_node* parent_node = nullptr);
+		
+		context& parent_context();
+		
+		const context& parent_context() const;
 	};
 }
 

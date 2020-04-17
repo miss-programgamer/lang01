@@ -7,10 +7,14 @@
 
 
 using tokens::empty;
-using tokens::indentation;
+using tokens::upline;
 using tokens::newline;
 using tokens::identifier;
-using tokens::comment;
+using tokens::numeric;
+using tokens::quoted_string;
+using tokens::short_string;
+using tokens::delimiter;
+using tokens::operator_t;
 using tokens::invalid;
 using tokens::any_token;
 using tokens::lexer;

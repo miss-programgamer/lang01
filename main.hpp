@@ -4,7 +4,9 @@
 
 #include <utility>
 #include <type_traits>
+#include <limits>
 #include <memory>
+#include <initializer_list>
 #include <string>
 #include <string_view>
 #include <optional>
@@ -19,7 +21,9 @@
 using std::forward;
 using std::decay_t;
 using std::remove_reference;
+using std::numeric_limits;
 using std::unique_ptr;
+using std::initializer_list;
 using std::string;
 using std::string_view;
 using std::stringstream;

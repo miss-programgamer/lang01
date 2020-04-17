@@ -13,9 +13,9 @@ namespace tokens
 		return os;
 	}
 	
-	ostream& operator<<(ostream& os, const indentation& token)
+	ostream& operator<<(ostream& os, const upline& token)
 	{
-		os << "[" << token.type << ": " << token.content().size() << " ]";
+		os << "[" << token.type << ": " << token.content() << " ]";
 		return os;
 	}
 	

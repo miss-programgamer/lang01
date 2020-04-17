@@ -3,9 +3,10 @@
 
 namespace tokens
 {
-	lexer::lexer(const string_view& source_name, const vector<string_view>& source_lines):
+	lexer::lexer(const string_view& source_name, const vector<string_view>& source_lines, vector<any_token>* tokens):
 		source_name(source_name),
-		source_lines(&source_lines)
+		source_lines(&source_lines),
+		tokens(tokens)
 	{
 		cursor_lineindex = 0;
 		cursor_charindex = 0;
@@ -30,13 +31,18 @@ namespace tokens
 		}	
 	}
 	
-	bool lexer::fill(vector<any_token>& tokens)
+	bool lexer::fill()
 	{
 		for (any_token token; next(token);)
 		{
-			tokens.push_back(token);
+			tokens->push_back(token);
 		}
 		
 		return invalid_count == 0;
+	}
+	
+	bool lexer::lex(const string_view& source_name, const vector<string_view>& source_lines, vector<any_token>& tokens)
+	{
+		return lexer(source_name, source_lines, &tokens).fill();
 	}
 }

@@ -4,7 +4,6 @@
 #include "nodes.hpp"
 
 
-// TODO: Parse tokens into AST nodes
 // TODO: Compile the AST into bytecode
 // TODO: Create the VM for said bytecode
 
@@ -29,8 +28,9 @@ int main(int argc, char* argv[])
     
     if (args.size() == 0)
     {
-        cout << "Starting Lang01 in REPL mode:" << endl;
+        cout << "Starting Lang01's interactive mode:\n";
         
+        string_view source_name = "interactive mode";
         for (string source_text; source_text != ".exit";)
         {
             // read lines from cin
@@ -40,17 +40,17 @@ int main(int argc, char* argv[])
             
             // fill vector of tokens created from cin
             vector<any_token> tokens;
-            lexer lexer(program_name, source_lines);
-            lexer.fill(tokens);
+            lexer lexer(source_name, source_lines, &tokens);
+            lexer.fill();
             
             // fill vector with nodes matched from tokens
-            any_node program;
-            parser parser(tokens, program_name);
-            parser.fill(program);
+            any_node root = program(nullptr, source_name);
+            parser parser(source_name, tokens, &root);
+            parser.fill();
             
             // print program nodes
             cout << tokens << "===\n";
-            cout << program;
+            cout << root;
         }
         
         cout << "Goodbye!\n";
@@ -66,17 +66,17 @@ int main(int argc, char* argv[])
             
             // fill vector of tokens created from that source file
             vector<any_token> tokens;
-            lexer lexer(source_name, source_lines);
-            lexer.fill(tokens);
+            lexer lexer(source_name, source_lines, &tokens);
+            lexer.fill();
             
             // fill vector with nodes matched from tokens
-            any_node program;
-            parser parser(tokens, source_name);
-            parser.fill(program);
+            any_node root = program(nullptr, source_name);
+            parser parser(source_name, tokens, &root);
+            parser.fill();
             
             // print program nodes
             cout << tokens << "===\n";
-            cout << program;
+            cout << root;
         }
     }
     

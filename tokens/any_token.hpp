@@ -7,10 +7,13 @@
 
 
 // Comma-separated list of all valid token types
-#define TOKENS_EVERY empty, indentation, newline, identifier, numeric, quoted_string, short_string, delimiter, operator_t, invalid
+#define TOKENS_EVERY empty, upline, newline, identifier, numeric, quoted_string, short_string, delimiter, operator_t, invalid
 
 // Comma-separated list of all tokens that can be matched
-#define TOKENS_MATCHABLE indentation, newline, identifier, numeric, quoted_string, short_string, delimiter, operator_t, invalid
+#define TOKENS_MATCHABLE upline, newline, identifier, numeric, quoted_string, short_string, delimiter, operator_t, invalid
+
+// Comma-separated list of all tokens that contain literal values
+#define TOKENS_LITERAL numeric, quoted_string, short_string
 
 
 namespace tokens
@@ -29,6 +32,11 @@ namespace tokens
 		template<typename... T>
 		constexpr bool holds() const
 		{ return (holds_alternative<T>(self) || ...); }
+		
+		// Checks if this holds any of the given token type and its contents match.
+		template<typename... T>
+		constexpr bool holds(const string_view& other_content) const
+		{ return (holds_alternative<T>(self) || ...) && content() == other_content; }
 		
 		// Applies the given visitor object to the held token.
 		template<typename V>

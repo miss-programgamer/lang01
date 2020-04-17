@@ -43,6 +43,20 @@ namespace nodes
 		});
 	}
 	
+	context& any_node::parent_context()
+	{
+		return *visit([](auto&& node) -> context* {
+			return &node.parent_context();
+		});
+	}
+	
+	const context& any_node::parent_context() const
+	{
+		return *visit([](auto&& node) -> const context* {
+			return &node.parent_context();
+		});
+	}
+	
 	
 	static inline int nodes_index()
 	{ static int index = ios_base::xalloc(); return index; }
@@ -56,19 +70,21 @@ namespace nodes
 	static inline ostream& nodes_indent_down(ostream& os)
 	{ --os.iword(nodes_index()); return os; }
 	
+	static inline void nodes_write_indent(ostream& os)
+	{ repeat (nodes_indent(os) + 1) { os << "  "; } }
+	
 	ostream& operator<<(ostream& os, const any_node& node)
 	{
 		node.visit([&os](auto&& node) {
-			os << node << "\n" << nodes_indent_up;
+			nodes_write_indent(os);
+			os << node << "\n";
 		});
 		
+		os << nodes_indent_up;
 		for (auto child: node.children_nodes())
-		{
-			repeat (nodes_indent(os)) { os << "  "; }
 			os << *child;
-		}
-		
 		os << nodes_indent_down;
+		
 		return os;
 	}
 }
