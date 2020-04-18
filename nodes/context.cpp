@@ -9,6 +9,7 @@ namespace nodes
 			return undefine(def);
 		
 		roles[string(def)] = def_role;
+		return true;
 	}
 	
 	bool context::define_op(const string_view& def, oprole op_role)
@@ -18,6 +19,7 @@ namespace nodes
 		
 		roles[string(def)] = role::OPERATOR;
 		oproles[string(def)] |= op_role;
+		return true;
 	}
 	
 	bool context::define_keyword(const string_view& def, keyrole key_role)
@@ -27,6 +29,7 @@ namespace nodes
 		
 		roles[string(def)] = role::KEYWORD;
 		keyroles[string(def)] = key_role;
+		return true;
 	}
 	
 	bool context::undefine(const string_view& def)

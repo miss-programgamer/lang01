@@ -119,6 +119,8 @@ namespace nodes
 		template<>
 		bool match_expr<literal>(any_node& parent, int precedence)
 		{
+			unused_arg(precedence);
+			
 			if (!cursor_token().holds<TOKENS_LITERAL>() && !cursor_is_const(parent))
 				return false;
 			
@@ -131,6 +133,8 @@ namespace nodes
 		template<>
 		bool match_expr<variable>(any_node& parent, int precedence)
 		{
+			unused_arg(precedence);
+			
 			if (!cursor_is_variable_identifier(parent))
 				return false;
 			
@@ -195,6 +199,8 @@ namespace nodes
 		template<>
 		bool match_expr<scope>(any_node& parent, int precedence)
 		{
+			unused_arg(precedence);
+			
 			if (!cursor_token().holds<newline>())
 				return false;
 			

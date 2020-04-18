@@ -115,9 +115,14 @@ namespace nodes
 		source_lines(&source_lines)
 	{}
 	
+	context& scope::parent_context()
+	{ return self; }
+	
+	const context& scope::parent_context() const
+	{ return self; }
+	
 	bool scope::fill()
 	{
-		vector<any_token> tokens;
 		return lexer::lex(*source_name, *source_lines, tokens) && parser::parse(*source_name, tokens, parent_last_child());
 	}
 	

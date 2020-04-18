@@ -50,4 +50,13 @@ namespace tokens
 		token.visit([&os](auto&& token) { os << token; });
 		return os;
 	}
+	
+	ostream& operator<<(ostream& os, const vector<any_token>& tokens)
+	{
+		for (auto token: tokens)
+		{
+			cout << token << "\n";
+		}
+		return os;
+	}
 }

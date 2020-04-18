@@ -1,10 +1,19 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(Lang01 VERSION 0.1.0)
 
+# Enable the maximum level of errors
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	add_compile_options("-Wextra")
+endif()
+if(MSVC)
+    string(REGEX REPLACE "/W[1-3]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
+
 # TODO: configure tests
 # include(CTest)
 # enable_testing()
 
+# Add executable and its files
 add_executable(Lang01
 	"main.hpp"
 	"main.cpp"
@@ -39,4 +48,5 @@ add_executable(Lang01
 	"nodes/parser.cpp"
 	"nodes.hpp")
 
+# Set the C++ standard for the main target
 set_property(TARGET Lang01 PROPERTY CXX_STANDARD 17)

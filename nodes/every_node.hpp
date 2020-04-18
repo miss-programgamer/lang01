@@ -10,8 +10,6 @@
 
 namespace nodes
 {
-	class any_node;
-	
 	// Represents the absence of any kind operation. It does nothing!
 	class nop: public basic_node
 	{
@@ -114,18 +112,24 @@ namespace nodes
 	};
 	
 	// Represents a list of lines to be lexed and parsed.
-	class scope: public basic_node
+	class scope: public basic_node, public context
 	{
 	protected:
 		const string_view* source_name;
 		
 		const vector<string_view>* source_lines;
 		
+		vector<any_token> tokens;
+		
 	public:
 		static constexpr string_view type = "scope";
 		
 		// Builds a scope node with a parent node and a list of lines.
 		scope(any_node* parent_node, const string_view& source_name, const vector<string_view>& source_lines);
+		
+		context& parent_context();
+		
+		const context& parent_context() const;
 		
 		bool fill();
 	

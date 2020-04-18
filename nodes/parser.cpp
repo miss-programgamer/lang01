@@ -14,8 +14,8 @@ namespace nodes
 		global_context().define_keyword("false", keyrole::CONST);
 		
 		global_context().define_keyword("if", keyrole::FLOW);
+		global_context().define_keyword("while", keyrole::FLOW);
 		global_context().define_keyword("do", keyrole::TRIP);
-		// global_context().define_keyword("while", keyrole::FLOW);
 		
 		global_context().define("print", role::FUNCTION);
 	}
@@ -36,6 +36,8 @@ namespace nodes
 	
 	bool parser::parse(const string_view& source_name, const vector<any_token>& tokens, any_node* root)
 	{
-		return parser(source_name, tokens, root).fill();
+		const auto& result = parser(source_name, tokens, root).fill();
+		cout << " =={Nodes}==\n" << *root;
+		return result;
 	}
 }

@@ -69,6 +69,8 @@ namespace tokens
 		// Prints the token's text to an ostream.
 		friend ostream& operator<<(ostream& os, const any_token& token);
 	};
+	
+	ostream& operator<<(ostream& os, const vector<any_token>& tokens);
 }
 
 

@@ -71,7 +71,7 @@ namespace nodes
 	{ --os.iword(nodes_index()); return os; }
 	
 	static inline void nodes_write_indent(ostream& os)
-	{ repeat (nodes_indent(os) + 1) { os << "  "; } }
+	{ repeat (nodes_indent(os)) { os << "  "; } }
 	
 	ostream& operator<<(ostream& os, const any_node& node)
 	{

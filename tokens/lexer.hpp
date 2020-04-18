@@ -70,16 +70,16 @@ namespace tokens
 		{ return (cursor_lineindex < source_lines->size()) ? (*source_lines)[cursor_lineindex] : string_view(); }
 		
 		// If the cursor position is valid, returns the character at that position. Otherwise, returns \0.
-		inline unsigned int cursor_char() const
+		inline codepoint_t cursor_char() const
 		{ return self ? cursor_line()[cursor_charindex] : '\0'; }
 		
 		// Checks if the cursor is a line ending (\n or \0).
 		inline bool cursor_is_endline() const
-		{ int c = cursor_char(); return c == '\n' || c == '\0'; }
+		{ codepoint_t c = cursor_char(); return c == '\n' || c == '\0'; }
 		
 		// Checks if the cursor is a letter.
 		inline bool cursor_is_letter() const
-		{ int c = cursor_char(); return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+		{ codepoint_t c = cursor_char(); return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
 		
 		// Checks if the cursor is a letter or underscore.
 		inline bool cursor_is_letter_or_underscore() const
@@ -87,16 +87,16 @@ namespace tokens
 		
 		// Checks if the cursor is a digit.
 		inline bool cursor_is_digit() const
-		{ int c = cursor_char(); return c >= '0' && c <= '9'; }
+		{ codepoint_t c = cursor_char(); return c >= '0' && c <= '9'; }
 		
 		// Checks if the cursor is a delimiter.
 		inline bool cursor_is_delimiter() const
-		{ int c = cursor_char(); return c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}' || c == ',' || c == '.'; }
+		{ codepoint_t c = cursor_char(); return c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}' || c == ',' || c == '.'; }
 		
 		// Checks if the cursor is a symbol, part of an operator.
 		inline bool cursor_is_symbol() const
 		{
-			int c = cursor_char();
+			codepoint_t c = cursor_char();
 			return c == '!' || (c >= '#' && c <= '&') ||
 				   c == '*' || c == '+' || c == '-' || c == '/' ||
 				   (c >= ':' && c <= '@') || c == '\\' || c == '^' || c == '|' || c == '~';
@@ -104,7 +104,7 @@ namespace tokens
 		
 		// Checks if the cursor is either empty space or a tab.
 		inline bool cursor_is_whitespace() const
-		{  int c = cursor_char(); return c == ' ' || c == '\t'; }
+		{  codepoint_t c = cursor_char(); return c == ' ' || c == '\t'; }
 		
 		// Moves the cursor forward to the next character.
 		inline void advance_cursor_char()
@@ -128,10 +128,7 @@ namespace tokens
 		
 		// Returns the string view between the match start and the cursor.
 		inline string_view match_slice() const
-		{
-			auto line = cursor_line();
-			return cursor_line().substr(match_start, match_size());
-		}
+		{ return cursor_line().substr(match_start, match_size()); }
 		
 		// Emplaces a match into the given token
 		template<typename T>
@@ -185,7 +182,7 @@ namespace tokens
 				
 				if (cursor_char() == ';')
 					do advance_cursor_char();
-						until (cursor_is_endline());
+						while (!cursor_is_endline());
 				
 				advance_cursor_char();
 				emplace_match<newline>(dest, leading_space);
@@ -237,7 +234,7 @@ namespace tokens
 			start_match();
 			
 			do advance_cursor_char();
-				until (cursor_char() == '"' || cursor_is_endline());
+				while (cursor_char() != '"' && !cursor_is_endline());
 			advance_cursor_char();
 			
 			return emplace_match<quoted_string>(dest, leading_space);
@@ -253,7 +250,7 @@ namespace tokens
 			start_match();
 			
 			do advance_cursor_char();
-				until (cursor_is_whitespace() || cursor_is_endline());
+				while (!cursor_is_whitespace() && !cursor_is_endline());
 			
 			return emplace_match<short_string>(dest, leading_space);
 		}
