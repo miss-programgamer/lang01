@@ -20,6 +20,7 @@ namespace utils
 				cursor += line.size() + 1;
 			}
 			text = textbuf.str();
+			text.pop_back();
 			
 			lines.clear();
 			lines.reserve(slices.size());
