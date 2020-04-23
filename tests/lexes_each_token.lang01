@@ -1,0 +1,2 @@
+__hello_world32 32hello_world "hello world" $hello ( ++
+	; hello comment

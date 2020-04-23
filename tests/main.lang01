@@ -1,0 +1,11 @@
+print "Hello World!"
+
+if n1 do
+	print "Hello Again!"
+
+print
+	"Hello"
+	"Yet"
+	"Again!"
+	print
+		"Ayooo!"
