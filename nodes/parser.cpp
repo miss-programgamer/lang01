@@ -37,7 +37,6 @@ namespace nodes
 	bool parser::parse(const string_view& source_name, const vector<any_token>& tokens, any_node* root)
 	{
 		const auto& result = parser(source_name, tokens, root).fill();
-		cout << " =={Nodes}==\n" << *root;
 		return result;
 	}
 }
