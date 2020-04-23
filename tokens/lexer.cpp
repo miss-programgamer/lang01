@@ -44,7 +44,6 @@ namespace tokens
 	bool lexer::lex(const string_view& source_name, const vector<string_view>& source_lines, vector<any_token>& tokens)
 	{
 		const auto& result = lexer(source_name, source_lines, &tokens).fill();
-		cout << " ==[Tokens]==\n" << tokens;
 		return result;
 	}
 }

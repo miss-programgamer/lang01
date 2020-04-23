@@ -2,7 +2,7 @@
 #define HEADER_TOKENS_LEXER_DEFINED
 
 
-#include "../main.hpp"
+#include "../libs.hpp"
 #include "any_token.hpp"
 
 
@@ -133,7 +133,7 @@ namespace tokens
 		// Emplaces a match into the given token
 		template<typename T>
 		inline bool emplace_match(any_token& token, size_t leading_space)
-		{ token.emplace<T>(source_name, match_slice(), cursor_lineindex + 1, cursor_lineindent, leading_space); return true; }
+		{ token.emplace<T>(match_slice(), cursor_lineindex + 1, cursor_lineindent, leading_space); return true; }
 		
 		// Matches any amount of whitespace and returns that amount.
 		inline size_t match_whitespace()

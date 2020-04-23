@@ -2,7 +2,7 @@
 #define HEADER_TOKENS_ANY_TOKEN_DEFINED
 
 
-#include "../main.hpp"
+#include "../libs.hpp"
 #include "every_token.hpp"
 
 
@@ -51,9 +51,6 @@ namespace tokens
 		// Returns the held token's name.
 		string_view name() const;
 		
-		// Returns the name of the source text where the held token was matched.
-		string_view source_name() const;
-		
 		// Returns the slice of source text obtained when the held token was matched.
 		string_view source_slice() const;
 		
@@ -66,8 +63,17 @@ namespace tokens
 		// Returns the indentation of the line where the held token was matched.
 		int lineindent() const;
 		
+		// Returns the indentation of the line where the held token was matched.
+		size_t leading_space() const;
+		
 		// Prints the token's text to an ostream.
 		friend ostream& operator<<(ostream& os, const any_token& token);
+		
+		// Checks if the two given tokens are equal in value.
+		friend bool operator==(const any_token& lhs, const any_token& rhs);
+		
+		// Checks if the two given tokens are different in value.
+		friend bool operator!=(const any_token& lhs, const any_token& rhs);
 	};
 	
 	ostream& operator<<(ostream& os, const vector<any_token>& tokens);

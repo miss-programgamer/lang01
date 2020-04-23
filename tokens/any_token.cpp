@@ -10,13 +10,6 @@ namespace tokens
 		});
 	}
 	
-	string_view any_token::source_name() const
-	{
-		return visit([](auto&& token) -> string_view {
-			return token.source_name;
-		});
-	}
-	
 	string_view any_token::source_slice() const
 	{
 		return visit([](auto&& token) -> string_view {
@@ -45,6 +38,13 @@ namespace tokens
 		});
 	}
 	
+	size_t any_token::leading_space() const
+	{
+		return visit([](auto&& token) -> size_t {
+			return token.leading_space;
+		});
+	}
+	
 	ostream& operator<<(ostream& os, const any_token& token)
 	{
 		token.visit([&os](auto&& token) { os << token; });
@@ -58,5 +58,25 @@ namespace tokens
 			cout << token << "\n";
 		}
 		return os;
+	}
+	
+	bool operator==(const any_token& lhs, const any_token& rhs)
+	{
+		// return false;
+		// return (any_token::variant&)(lhs) == (any_token::variant&)(rhs);
+		return
+		(
+			lhs.name()          == rhs.name() &&
+			lhs.source_slice()  == rhs.source_slice() &&
+			lhs.lineno()        == rhs.lineno() &&
+			lhs.lineindent()    == rhs.lineindent() &&
+			lhs.leading_space() == rhs.leading_space()
+		);
+	}
+	
+	bool operator!=(const any_token& lhs, const any_token& rhs)
+	{
+		// return false;
+		return !(lhs == rhs);
 	}
 }

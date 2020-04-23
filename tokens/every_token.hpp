@@ -2,7 +2,7 @@
 #define HEADER_TOKENS_EVERY_TOKEN_DEFINED
 
 
-#include "../main.hpp"
+#include "../libs.hpp"
 #include "basic_token.hpp"
 
 
@@ -28,6 +28,9 @@ namespace tokens
 		
 		using basic_token::basic_token;
 		
+		inline bool has_linefeed() const
+		{ return source_slice.back() == '\n'; }
+		
 		inline string_view content() const
 		{ return source_slice.substr(1, source_slice.size() - 1); }
 		
@@ -44,10 +47,10 @@ namespace tokens
 		using basic_token::basic_token;
 		
 		inline bool has_comment() const
-		{ return source_slice[0] == ';'; }
+		{ return source_slice.front() == ';'; }
 		
 		inline bool has_linefeed() const
-		{ return source_slice[source_slice.size() - 1] == '\n'; }
+		{ return source_slice.back() == '\n'; }
 		
 		inline string_view content() const
 		{ return has_comment() ? source_slice.substr(1, source_slice.size() - 1 - has_linefeed()) : source_slice.substr(0, 0); }
@@ -89,7 +92,7 @@ namespace tokens
 		using basic_token::basic_token;
 		
 		inline bool has_closing_quote() const
-		{ return source_slice[source_slice.size() - 1] == '"'; }
+		{ return source_slice.back() == '"'; }
 		
 		inline string_view content() const
 		{ return source_slice.substr(1, source_slice.size() - 1 - has_closing_quote()); }

@@ -2,7 +2,7 @@
 #define HEADER_TOKENS_BASIC_TOKEN_DEFINED
 
 
-#include "../main.hpp"
+#include "../libs.hpp"
 
 
 namespace tokens
@@ -15,8 +15,6 @@ namespace tokens
 		friend class any_token;
 		
 	protected:
-		string_view source_name;
-		
 		string_view source_slice;
 		
 		size_t lineno;
@@ -26,7 +24,7 @@ namespace tokens
 		size_t leading_space;
 		
 	public:
-		basic_token(const string_view source_name, const string_view source_slice, size_t lineno, int lineindent, size_t leading_space) noexcept;
+		basic_token(const string_view source_slice, size_t lineno, int lineindent, size_t leading_space) noexcept;
 		
 		inline string_view content() const
 		{ return source_slice; }
