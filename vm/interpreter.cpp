@@ -1,30 +1,95 @@
 #include "interpreter.hpp"
 
 
+#define TRY_INSTR(i, op) case op: return do_instr<op>(i)
+
+
 namespace vm
 {
-	interpreter::interpreter(vector<instruction>* instructions, size_t value_size_hint, size_t frame_size_hint):
-		program_counter(0),
-		instructions(instructions),
+	any_value interpreter::false_value = value::boolean{false};
+	
+	any_value interpreter::true_value = value::boolean{true};
+	
+	any_value interpreter::zero_value = value::number{0};
+	
+	any_value interpreter::null_value;
+	
+	interpreter::interpreter(function& main_function, size_t value_size_hint, size_t frame_size_hint):
 		value_stack(value_size_hint)
 	{
 		frame_stack.reserve(frame_size_hint);
-		frame_stack.emplace_back(0, 1, 1);
+		frame_stack.emplace_back(&main_function, 0, 0);
 	}
 	
 	interpreter::operator bool()
 	{
-		return program_counter < instructions->size();
+		return frame_stack.size() > 0u;
 	}
 	
-	any_value& interpreter::operator[](signed char index)
+	any_value& interpreter::operator[](address_t index)
 	{
-		return value_stack[frame_stack.back().base_index + index];
+		const auto addr = strip_addr(index);
+		
+		if (is_arg_addr(index)) {
+			return value_stack[frame_stack.back().args_index + addr];
+		} else if (is_val_addr(index)) {
+			return value_stack[frame_stack.back().values_index + addr];
+		} else if (is_ret_addr(index)) {
+			return value_stack[frame_stack.back().rets_index + addr];
+		} else if (is_cap_addr(index))
+		{
+			if (addr < 60)
+			{
+				return (*top_frame().current_function->captures)[addr];
+			}
+			else
+			{
+				if (addr == 60) {
+					return false_value;
+				} else if (addr == 61) {
+					return true_value;
+				} else if (addr == 62) {
+					return zero_value;
+				} else if (addr == 63) {
+					return null_value;
+				}
+			}
+		}
+		
+		throw std::runtime_error("this is unreachable, but compilers will complain if I don't put anything here.");
 	}
 	
-	const any_value& interpreter::operator[](signed char index) const
+	const any_value& interpreter::operator[](address_t index) const
 	{
-		return value_stack[frame_stack.back().base_index + index];
+		const auto addr = strip_addr(index);
+		
+		if (is_arg_addr(index)) {
+			return value_stack[frame_stack.back().args_index + addr];
+		} else if (is_val_addr(index)) {
+			return value_stack[frame_stack.back().values_index + addr];
+		} else if (is_ret_addr(index)) {
+			return value_stack[frame_stack.back().rets_index + addr];
+		} else if (is_cap_addr(index))
+		{
+			if (addr < 60)
+			{
+				return (*top_frame().current_function->captures)[addr];
+			}
+			else
+			{
+				if (addr == 60) {
+					return false_value;
+				} else if (addr == 61) {
+					return true_value;
+				} else if (addr == 62) {
+					return zero_value;
+				} else if (addr == 63) {
+					return null_value;
+				}
+			}
+		}
+		
+		throw std::runtime_error("this is unreachable, but compilers will complain if I don't put anything here.");
 	}
 	
 	bool interpreter::step()
@@ -32,25 +97,40 @@ namespace vm
 		if (!self)
 			return false;
 		
-		const auto& i = (*instructions)[program_counter++];
-		switch (i.code)
+		if (!top_frame())
+			return do_instr<opcode::RET>({ opcode::RET, 0, 0, 0 });
+		
+		const auto& instr = current_instruction();
+		skip_ahead();
+		switch (instr.code)
 		{
-		case opcode::COPY:      return do_instr<opcode::COPY>(i);
-		case opcode::CHECK:     return do_instr<opcode::CHECK>(i);
-		case opcode::CHECK_SET: return do_instr<opcode::CHECK_SET>(i);
-		case opcode::CHECK_EQ:  return do_instr<opcode::CHECK_EQ>(i);
-		case opcode::CHECK_LT:  return do_instr<opcode::CHECK_LT>(i);
-		case opcode::CHECK_LE:  return do_instr<opcode::CHECK_LE>(i);
-		case opcode::JUMP:      return do_instr<opcode::JUMP>(i);
-		case opcode::CALL:      return do_instr<opcode::CALL>(i);
-		case opcode::RETURN:    return do_instr<opcode::RETURN>(i);
-		default:                return false;
+			TRY_INSTR(instr, opcode::COPY);
+			TRY_INSTR(instr, opcode::JUMP);
+			TRY_INSTR(instr, opcode::CALL);
+			TRY_INSTR(instr, opcode::RET);
+			
+			TRY_INSTR(instr, opcode::ADD);
+			TRY_INSTR(instr, opcode::SUB);
+			TRY_INSTR(instr, opcode::MUL);
+			TRY_INSTR(instr, opcode::DIV);
+			
+			TRY_INSTR(instr, opcode::MOD);
+			TRY_INSTR(instr, opcode::POW);
+			TRY_INSTR(instr, opcode::UNM);
+			TRY_INSTR(instr, opcode::NOT);
+			
+			TRY_INSTR(instr, opcode::CHECK);
+			TRY_INSTR(instr, opcode::EQ);
+			TRY_INSTR(instr, opcode::LT);
+			TRY_INSTR(instr, opcode::LE);
+			
+			default: return false;
 		}
 	}
 	
 	bool interpreter::run()
 	{
-		while (step());
+		while (self && step());
 		return false;
 	}
 }

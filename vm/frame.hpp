@@ -3,7 +3,8 @@
 
 
 #include "../libs.hpp"
-#include "any_value.hpp"
+#include "instruction.hpp"
+#include "function.hpp"
 
 
 namespace vm
@@ -13,14 +14,22 @@ namespace vm
 		friend class interpreter;
 		
 	protected:
-		size_t return_address;
+		function* current_function;
 		
-		size_t base_index;
+		size_t args_index;
 		
-		size_t top_index;
+		size_t values_index;
+		
+		size_t rets_index;
+		
+		size_t program_counter;
 		
 	public:
-		frame(size_t return_address, size_t base_index, size_t top_index);
+		frame(function* current_function, size_t base_index, size_t argc);
+		
+		operator bool();
+		
+		instruction& current_instruction();
 	};
 }
 

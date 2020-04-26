@@ -58,6 +58,8 @@ list(APPEND vm_files
 	"vm/any_value.cpp"
 	"vm/frame.hpp"
 	"vm/frame.cpp"
+	"vm/function.hpp"
+	"vm/function.cpp"
 	"vm/interpreter.hpp"
 	"vm/interpreter.cpp"
 	"vm.hpp")
@@ -69,6 +71,13 @@ add_executable(Lang01
 	${utils_files}
 	${tokens_files}
 	${nodes_files}
+	${vm_files})
+
+# Add vm executable
+add_executable(Lang01VM
+	"vm-main.cpp"
+	${lib_files}
+	${utils_files}
 	${vm_files})
 
 # Add lexing test
@@ -95,9 +104,11 @@ add_executable(VirtualMachineTest
 
 # C++ 17 for all targets
 set_property(TARGET Lang01 PROPERTY CXX_STANDARD 17)
+set_property(TARGET Lang01VM PROPERTY CXX_STANDARD 17)
 set_property(TARGET LexingTest PROPERTY CXX_STANDARD 17)
 set_property(TARGET ParsingTest PROPERTY CXX_STANDARD 17)
 set_property(TARGET VirtualMachineTest PROPERTY CXX_STANDARD 17)
 
 # Configure tests
-add_test(NAME lexes_each_token COMMAND LexingTest "lexes_each_token")
+add_test(NAME lexes_each_token
+	COMMAND LexingTest "lexes_each_token")

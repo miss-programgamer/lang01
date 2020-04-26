@@ -1,7 +1,7 @@
 #include "every_value.hpp"
 
 
-namespace vm
+namespace vm::value
 {
 	
 }

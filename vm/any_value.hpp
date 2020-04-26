@@ -6,7 +6,7 @@
 #include "every_value.hpp"
 
 
-#define VALUES_EVERY null, boolean, number, text
+#define VALUES_EVERY value::null, value::boolean, value::number, value::text, value::function, value::ex_function
 
 
 namespace vm
@@ -20,6 +20,14 @@ namespace vm
 		
 		using variant::emplace;
 		
+		any_value();
+		
+		any_value(nullptr_t);
+		
+		any_value(bool value);
+		
+		any_value(double value);
+		
 		operator bool();
 		
 		// Checks if this holds any of the given value types.
@@ -29,19 +37,23 @@ namespace vm
 		
 		// Checks if this holds the given value.
 		constexpr bool holds(nullptr_t) const
-		{ return holds<null>(); }
+		{ return holds<value::null>(); }
 		
 		// Checks if this holds the given value.
 		constexpr bool holds(bool value) const
-		{ return holds<boolean>() && as<boolean>().value == value; }
+		{ return holds<value::boolean>() && as<value::boolean>().value == value; }
 		
 		// Checks if this holds the given value.
 		constexpr bool holds(double value) const
-		{ return holds<number>() && as<number>().value == value; }
+		{ return holds<value::number>() && as<value::number>().value == value; }
 		
 		// Returns the current value as one of its variants.
 		template<typename N>
-		N& as() { return std::get<N>(self); }
+		N& as()
+		{
+			// TODO: This should probably throw an exception when it's wrong (does it already?)
+			return std::get<N>(self);
+		}
 		
 		// Returns the current value as one of its variants.
 		template<typename N>

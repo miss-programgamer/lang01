@@ -4,6 +4,8 @@
 
 #include "../libs.hpp"
 #include "instruction.hpp"
+#include "any_value.hpp"
+#include "function.hpp"
 #include "frame.hpp"
 
 
@@ -12,127 +14,235 @@ namespace vm
 	class interpreter
 	{
 	protected:
-		size_t program_counter;
+		static any_value false_value;
 		
-		const vector<instruction>* instructions;
+		static any_value true_value;
+		
+		static any_value zero_value;
+		
+		static any_value null_value;
 		
 		vector<any_value> value_stack;
 		
 		vector<frame> frame_stack;
 		
 	public:
-		interpreter(vector<instruction>* instructions, size_t value_size_hint = 4096u, size_t frame_size_hint = 128u);
+		interpreter(function& main_function, size_t value_size_hint = 4096u, size_t frame_size_hint = 128u);
 		
 		operator bool();
 		
-		any_value& operator[](signed char index);
+		any_value& operator[](address_t index);
 		
-		const any_value& operator[](signed char index) const;
+		const any_value& operator[](address_t index) const;
 		
 		bool step();
 		
 		bool run();
 		
 	protected:
+		inline frame& top_frame()
+		{ return frame_stack.back(); }
+		
+		inline const frame& top_frame() const
+		{ return frame_stack.back(); }
+		
+		inline size_t& program_counter()
+		{ return top_frame().program_counter; }
+		
+		inline const instruction& current_instruction()
+		{ return top_frame().current_instruction(); }
+		
+		inline void skip_ahead()
+		{ program_counter()++; }
+		
+		inline void skip_offset(size_t offset)
+		{ program_counter() += offset; }
+		
 		template<opcode C>
 		inline bool do_instr(const instruction&);
 		
 		template<>
 		inline bool do_instr<opcode::COPY>(const instruction& i)
 		{
-			self[i.val_b] = self[i.val_a];
-			return true;
-		}
-		
-		template<>
-		inline bool do_instr<opcode::CHECK>(const instruction& i)
-		{
-			if (!self[i.val_a])
-				++program_counter;
-			return true;
-		}
-		
-		template<>
-		inline bool do_instr<opcode::CHECK_SET>(const instruction& i)
-		{
-			if (auto& val_a = self[i.val_a]; val_a) {
-				self[i.val_c] = val_a;
-				++program_counter;
-			}
-			return true;
-		}
-		
-		template<>
-		inline bool do_instr<opcode::CHECK_EQ>(const instruction& i)
-		{
-			if (const auto& result = self[i.val_a] == self[i.val_b]; result != self[i.val_c])
-				++program_counter;
-			return true;
-		}
-		
-		template<>
-		inline bool do_instr<opcode::CHECK_LT>(const instruction& i)
-		{
-			const auto& val_a = self[i.val_a];
-			const auto& val_b = self[i.val_b];
-			
-			// TODO: Implement some sort of exception mechanism for this.
-			if (!val_a.holds<number>() || !val_b.holds<number>())
-				return false;
-			
-			if (any_value result = boolean{val_a.as<number>().value < val_b.as<number>().value}; result != self[i.val_c])
-				++program_counter;
-			return true;
-		}
-		
-		template<>
-		inline bool do_instr<opcode::CHECK_LE>(const instruction& i)
-		{
-			const auto& val_a = self[i.val_a];
-			const auto& val_b = self[i.val_b];
-			
-			// TODO: Implement some sort of exception mechanism for this.
-			if (!val_a.holds<number>() || !val_b.holds<number>())
-				return false;
-			
-			if (any_value result = boolean{val_a.as<number>().value <= val_b.as<number>().value}; result != self[i.val_c])
-				++program_counter;
+			self[i.addr_b] = self[i.addr_a];
 			return true;
 		}
 		
 		template<>
 		inline bool do_instr<opcode::JUMP>(const instruction& i)
 		{
-			const auto& val_a = self[i.val_a];
-			
-			if (!val_a.holds<number>())
-				return false;
-			
-			program_counter = size_t(double(program_counter) + val_a.as<number>().value);
+			auto& val = self[i.addr_a].as<value::number>().value;
+			skip_offset(size_t(val) - 1);
 			return true;
 		}
 		
 		template<>
 		inline bool do_instr<opcode::CALL>(const instruction& i)
 		{
-			const auto& val_a = self[i.val_a];
-			const auto& val_b = self[i.val_b];
-			const auto& val_c = self[i.val_b];
-			
-			if (!val_a.holds<number>() || !val_b.holds<number>() || !val_c.holds<number>())
+			if (self[i.addr_a].holds<value::function>())
+			{
+				auto func = self[i.addr_a].as<value::function>().value;
+				auto argc = self[i.addr_b].as<value::number>().value;
+				
+				frame_stack.emplace_back(func, top_frame().rets_index, size_t(argc));
+				return true;
+			}
+			else if (self[i.addr_a].holds<value::ex_function>())
+			{
+				auto func = self[i.addr_a].as<value::ex_function>().value;
+				auto argc = self[i.addr_b].as<value::number>().value;
+				
+				func(value_stack.data(), top_frame().rets_index, top_frame().rets_index + size_t(argc));
+				return true;
+			}
+			else {
 				return false;
+			}
+		}
+		
+		template<>
+		inline bool do_instr<opcode::RET>(const instruction&)
+		{
+			frame_stack.pop_back();
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::ADD>(const instruction& i)
+		{
+			auto& lhs  = self[i.addr_a].as<value::number>();
+			auto& rhs  = self[i.addr_b].as<value::number>();
+			auto& dest = self[i.addr_c];
 			
-			frame_stack.emplace_back(program_counter, size_t(val_a.as<number>().value), size_t(val_b.as<number>().value));
-			program_counter = size_t(val_c.as<number>().value);
+			dest = lhs.value + rhs.value;
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::SUB>(const instruction& i)
+		{
+			auto& lhs  = self[i.addr_a].as<value::number>();
+			auto& rhs  = self[i.addr_b].as<value::number>();
+			auto& dest = self[i.addr_c];
+			
+			dest = lhs.value - rhs.value;
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::MUL>(const instruction& i)
+		{
+			auto& lhs  = self[i.addr_a].as<value::number>();
+			auto& rhs  = self[i.addr_b].as<value::number>();
+			auto& dest = self[i.addr_c];
+			
+			dest = lhs.value * rhs.value;
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::DIV>(const instruction& i)
+		{
+			auto& lhs  = self[i.addr_a].as<value::number>();
+			auto& rhs  = self[i.addr_b].as<value::number>();
+			auto& dest = self[i.addr_c];
+			
+			dest = lhs.value / rhs.value;
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::MOD>(const instruction& i)
+		{
+			auto& lhs  = self[i.addr_a].as<value::number>();
+			auto& rhs  = self[i.addr_b].as<value::number>();
+			auto& dest = self[i.addr_c];
+			
+			dest = double(std::int_fast64_t(lhs.value) % std::int_fast64_t(rhs.value));
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::POW>(const instruction& i)
+		{
+			auto& lhs  = self[i.addr_a].as<value::number>();
+			auto& rhs  = self[i.addr_b].as<value::number>();
+			auto& dest = self[i.addr_c];
+			
+			dest = std::pow(lhs.value, rhs.value);
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::UNM>(const instruction& i)
+		{
+			auto& arg  = self[i.addr_a].as<value::number>();
+			auto& dest = self[i.addr_c];
+			
+			dest = -arg.value;
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::NOT>(const instruction& i)
+		{
+			auto& arg  = self[i.addr_a];
+			auto& dest = self[i.addr_c];
+			
+			dest = value::boolean{!arg};
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::CHECK>(const instruction& i)
+		{
+			auto& arg  = self[i.addr_a];
+			auto& set  = self[i.addr_b];
+			auto& dest = self[i.addr_c];
+			
+			if (!arg) {
+				if (set) dest = arg;
+				skip_ahead();
+			}
 			
 			return true;
 		}
 		
 		template<>
-		inline bool do_instr<opcode::RETURN>(const instruction&)
+		inline bool do_instr<opcode::EQ>(const instruction& i)
 		{
-			program_counter = frame_stack.back().return_address;
-			frame_stack.pop_back();
+			const auto& lhs = self[i.addr_a];
+			const auto& rhs = self[i.addr_b];
+			const auto& ref = self[i.addr_c];
+			
+			if (any_value result = lhs == rhs; result != ref)
+				skip_ahead();
+			
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::LT>(const instruction& i)
+		{
+			const auto& lhs = self[i.addr_a].as<value::number>().value;
+			const auto& rhs = self[i.addr_b].as<value::number>().value;
+			const auto& ref = self[i.addr_c];
+			
+			if (any_value result = lhs < rhs; result != ref)
+				skip_ahead();
+			
+			return true;
+		}
+		
+		template<>
+		inline bool do_instr<opcode::LE>(const instruction& i)
+		{
+			const auto& lhs = self[i.addr_a].as<value::number>().value;
+			const auto& rhs = self[i.addr_b].as<value::number>().value;
+			const auto& ref = self[i.addr_c];
+			
+			if (any_value result = lhs <= rhs; result != ref)
+				skip_ahead();
 			
 			return true;
 		}
