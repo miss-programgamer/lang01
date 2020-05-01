@@ -8,7 +8,9 @@ size_t print(any_value* base, size_t args_index, size_t values_index)
 	{
 		any_value& val = base[i];
 		
-		if (val.holds<v::boolean>())
+		if (val.holds<v::null>())
+			cout << "null";
+		else if (val.holds<v::boolean>())
 			cout << val.as<v::boolean>().value;
 		else if (val.holds<v::number>())
 			cout << val.as<v::number>().value;
@@ -19,7 +21,7 @@ size_t print(any_value* base, size_t args_index, size_t values_index)
 		else if (val.holds<v::ex_function>())
 			cout << val.as<v::ex_function>().value;
 		else
-			cout << "null";
+			cout << "~undefined~";
 	}
 	
 	cout << endl;

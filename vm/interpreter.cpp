@@ -6,13 +6,13 @@
 
 namespace vm
 {
-	any_value interpreter::false_value = value::boolean{false};
-	
-	any_value interpreter::true_value = value::boolean{true};
-	
 	any_value interpreter::zero_value = value::number{0};
 	
 	any_value interpreter::null_value;
+	
+	any_value interpreter::false_value = value::boolean{false};
+	
+	any_value interpreter::true_value = value::boolean{true};
 	
 	interpreter::interpreter(function& main_function, size_t value_size_hint, size_t frame_size_hint):
 		value_stack(value_size_hint)
@@ -40,51 +40,18 @@ namespace vm
 		{
 			if (addr < 60)
 			{
-				return (*top_frame().current_function->captures)[addr];
+				return top_frame().current_function->captures[addr];
 			}
 			else
 			{
 				if (addr == 60) {
-					return false_value;
-				} else if (addr == 61) {
-					return true_value;
-				} else if (addr == 62) {
 					return zero_value;
-				} else if (addr == 63) {
-					return null_value;
-				}
-			}
-		}
-		
-		throw std::runtime_error("this is unreachable, but compilers will complain if I don't put anything here.");
-	}
-	
-	const any_value& interpreter::operator[](address_t index) const
-	{
-		const auto addr = strip_addr(index);
-		
-		if (is_arg_addr(index)) {
-			return value_stack[frame_stack.back().args_index + addr];
-		} else if (is_val_addr(index)) {
-			return value_stack[frame_stack.back().values_index + addr];
-		} else if (is_ret_addr(index)) {
-			return value_stack[frame_stack.back().rets_index + addr];
-		} else if (is_cap_addr(index))
-		{
-			if (addr < 60)
-			{
-				return (*top_frame().current_function->captures)[addr];
-			}
-			else
-			{
-				if (addr == 60) {
-					return false_value;
 				} else if (addr == 61) {
-					return true_value;
-				} else if (addr == 62) {
-					return zero_value;
-				} else if (addr == 63) {
 					return null_value;
+				} else if (addr == 62) {
+					return false_value;
+				} else if (addr == 63) {
+					return true_value;
 				}
 			}
 		}

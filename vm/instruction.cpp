@@ -3,7 +3,7 @@
 
 namespace vm
 {
-	static_assert(sizeof(instruction) == 4, "vm::instruction is not 32 bits in size.");
+	static_assert(sizeof(instruction) == 4, "vm::instruction is not 4 bytes in size.");
 	
 	instruction::instruction(opcode code, address_t addr_a, address_t addr_b, address_t addr_c):
 		code(code),

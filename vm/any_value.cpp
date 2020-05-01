@@ -3,6 +3,8 @@
 
 namespace vm
 {
+	static_assert(sizeof(any_value) == 16, "vm::any_value is not 16 bytes in size.");
+	
 	any_value::any_value():
 		variant(value::null{})
 	{}

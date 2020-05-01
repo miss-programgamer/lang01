@@ -16,9 +16,9 @@ namespace vm
 		friend class interpreter;
 		
 	protected:
-		vector<any_value>* captures;
+		vector<any_value> captures;
 		
-		vector<instruction>* instructions;
+		vector<instruction> instructions;
 		
 		size_t stack_space;
 		

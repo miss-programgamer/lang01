@@ -13,7 +13,7 @@ namespace vm
 	
 	frame::operator bool()
 	{
-		return program_counter < current_function->instructions->size();
+		return program_counter < current_function->instructions.size();
 	}
 	
 	instruction& frame::current_instruction()

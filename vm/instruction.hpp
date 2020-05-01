@@ -69,10 +69,10 @@ namespace vm
 	
 	enum cap_reserved_addr: address_t
 	{
-		false_addr = 0b1111'1100,
-		true_addr  = 0b1111'1101,
-		zero_addr  = 0b1111'1110,
-		null_addr  = 0b1111'1111,
+		zero_addr  = 0b1111'1100,
+		null_addr  = 0b1111'1101,
+		false_addr = 0b1111'1110,
+		true_addr  = 0b1111'1111,
 	};
 	
 	

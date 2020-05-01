@@ -14,13 +14,13 @@ namespace vm
 	class interpreter
 	{
 	protected:
-		static any_value false_value;
-		
-		static any_value true_value;
-		
 		static any_value zero_value;
 		
 		static any_value null_value;
+		
+		static any_value false_value;
+		
+		static any_value true_value;
 		
 		vector<any_value> value_stack;
 		
@@ -32,8 +32,6 @@ namespace vm
 		operator bool();
 		
 		any_value& operator[](address_t index);
-		
-		const any_value& operator[](address_t index) const;
 		
 		bool step();
 		
